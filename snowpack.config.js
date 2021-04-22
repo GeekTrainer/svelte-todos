@@ -7,12 +7,13 @@ module.exports = {
   },
   plugins: [
     /* ... */
+    '@snowpack/plugin-postcss',
     '@snowpack/plugin-svelte',
     [
       '@snowpack/plugin-typescript',
       {
         /* Yarn PnP workaround: see https://www.npmjs.com/package/@snowpack/plugin-typescript */
-        ...(process.versions.pnp ? {tsc: 'yarn pnpify tsc'} : {}),
+        ...(process.versions.pnp ? { tsc: 'yarn pnpify tsc' } : {}),
       },
     ],
   ],
