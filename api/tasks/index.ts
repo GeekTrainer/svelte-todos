@@ -32,11 +32,14 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     } else if (req.method === 'PUT' && req.body) {
         console.log(req.body);
         const task = req.body as Task;
+        const id = task.id;
+        const updateTask: any = {...task};
+        delete updateTask.id;
         const savedTask = await prisma.task.update({
             where: {
                 id: task.id
             },
-            data: task
+            data: updateTask
         });
         context.res = {
             // status: 200, /* Defaults to 200 */

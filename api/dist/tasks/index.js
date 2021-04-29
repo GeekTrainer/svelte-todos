@@ -41,11 +41,14 @@ const httpTrigger = function (context, req) {
         else if (req.method === 'PUT' && req.body) {
             console.log(req.body);
             const task = req.body;
+            const id = task.id;
+            const updateTask = Object.assign({}, task);
+            delete updateTask.id;
             const savedTask = yield prisma.task.update({
                 where: {
                     id: task.id
                 },
-                data: task
+                data: updateTask
             });
             context.res = {
                 // status: 200, /* Defaults to 200 */
