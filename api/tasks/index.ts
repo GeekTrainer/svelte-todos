@@ -1,12 +1,10 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
-// const { PrismaClientKnownRequestError } = require('@prisma/client')
-// const prisma = require('../lib/prisma');
-
 import { PrismaClient, Task } from '@prisma/client'
 
-const prisma = new PrismaClient()
-
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
+
+    const prisma = new PrismaClient()
+
     if (req.method === 'GET') {
         const tasks = await prisma.task.findMany();
 
