@@ -1,3 +1,5 @@
+const proxy = require('http2-proxy');
+
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
   mount: {
@@ -20,6 +22,18 @@ module.exports = {
   routes: [
     /* Enable an SPA Fallback in development: */
     // {"match": "routes", "src": ".*", "dest": "/index.html"},
+    {
+      src: '/api/.*',
+      dest: (req, res) => {
+        // remove /api prefix (optional)
+        // req.url = req.url.replace(/^\/api/, '');
+
+        return proxy.web(req, res, {
+          hostname: 'localhost',
+          port: 7071,
+        });
+      },
+    },
   ],
   optimize: {
     /* Example: Bundle your final build: */

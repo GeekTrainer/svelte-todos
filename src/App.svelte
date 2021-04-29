@@ -1,58 +1,88 @@
 <!-- App.svelte -->
 <script lang="ts">
-    import type { Todo } from "./types";
-    import TodoButton from "./Todo.svelte";
-    let todos = new Array<Todo>();
-    let newTodo: Todo = {
+    import type { Task } from "./types";
+    import TaskButton from "./Task.svelte";
+    let tasks = new Array<Task>();
+    let newTask: Task = {
         text: "",
         completed: false,
     };
 
-    todos.push({ text: "Sample 1", completed: true });
-    todos.push({ text: "Sample 2", completed: false });
+    async function loadTasks() {
+        const result = await fetch('/api/tasks');
+        tasks = await result.json();
+    }
 
-    function addTodo(event: KeyboardEvent) {
+    loadTasks();
+
+    async function addTask(event: KeyboardEvent) {
         if (event.key === "Enter") {
-            todos = [...todos, { ...newTodo }];
-            newTodo.text = "";
+            const result = await fetch(
+                '/api/tasks',
+                {
+                    method: 'POST',
+                    body: JSON.stringify(newTask),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                },
+            )
+            const serverTask = await result.json();
+
+            tasks = [...tasks, serverTask];
+            newTask.text = "";
             (event.target as HTMLElement).focus();
         }
     }
 
-    function toggleCompleted(todo: Todo) {
-        todos = [
-            ...todos.slice(0, todos.indexOf(todo)),
-            { ...todo, completed: !todo.completed },
-            ...todos.slice(todos.indexOf(todo) + 1)
+    async function toggleCompleted(task: Task) {
+        const result = await fetch(
+            'api/tasks',
+            {
+                method: 'PUT',
+                body: JSON.stringify({
+                    ...task,
+                    completed: !task.completed
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        const updatedTask = await result.json() as Task;
+
+        tasks = [
+            ...tasks.slice(0, tasks.indexOf(task)),
+            updatedTask,
+            ...tasks.slice(tasks.indexOf(task) + 1)
         ];
     }
 </script>
 
 <article class="container mx-auto px-3">
-    <h1 class="text-xl">Todo manager</h1>
+    <h1 class="text-xl">Task manager</h1>
 
     <div class="grid grid-flow-col">
         <div>
             <h2>Active</h2>
-            {#each todos.filter(t => !t.completed) as todo}
-                <TodoButton todo={todo} toggleCompleted={toggleCompleted} />
+            {#each tasks.filter(t => !t.completed) as task}
+                <TaskButton task={task} toggleCompleted={toggleCompleted} />
             {/each}
         </div>
         <div>
             <h2>Completed</h2>
-            {#each todos.filter(t => t.completed) as todo}
-                <TodoButton todo={todo} toggleCompleted={toggleCompleted} />
+            {#each tasks.filter(t => t.completed) as task}
+                <TaskButton task={task} toggleCompleted={toggleCompleted} />
             {/each}
         </div>
     </div>
-    <label
-        >Add todo:
+    <label>Add todo:
         <input
             class="border-solid border-black border p-1 text-gray-800"
             type="text"
             placeholder="Add text and press enter"
-            on:keypress={addTodo}
-            bind:value={newTodo.text}
+            on:keypress={addTask}
+            bind:value={newTask.text}
         />
     </label>
 </article>
